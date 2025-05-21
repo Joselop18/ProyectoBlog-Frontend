@@ -51,7 +51,7 @@ const Post = ({ post }) => {
           {post.title}
         </Heading>
         <Text fontSize="md" color={secondaryTextColor} textAlign="center" mt={2}>
-          Curso: {post.course}
+          Curso: {post.courses}
         </Text>
         <Text color={textColor} noOfLines={6} mt={4} fontSize="lg">
           {post.description}
@@ -94,9 +94,9 @@ const Post = ({ post }) => {
                       <ListItem key={comment._id}>
                         <ListIcon as={CheckCircleIcon} color="teal.500" />
                         <Text fontSize="lg" fontWeight="bold" color={textColor}>
-                          {comment.userName}:
+                          {comment.author}:
                         </Text>
-                        <Text color={secondaryTextColor}>{comment.content}</Text>
+                        <Text color={secondaryTextColor}>{comment.comment}</Text>
                         <Divider my={2} />
                       </ListItem>
                     ))

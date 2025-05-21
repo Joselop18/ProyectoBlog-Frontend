@@ -34,7 +34,7 @@ const Navbar = () => {
   };
 
   const handleNavigateToComments = () => {
-    navigate('/');
+    navigate('/comments');
   };
 
   const handleNavigateToHome = () => {
@@ -77,7 +77,7 @@ const Navbar = () => {
             Publicaciones
           </Link>
           <Link
-            href="#"
+            href=""
             fontWeight="medium"
             fontSize="lg"
             _hover={{

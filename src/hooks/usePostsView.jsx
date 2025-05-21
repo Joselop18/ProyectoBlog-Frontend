@@ -1,4 +1,3 @@
-// src/hooks/usePosts.js
 import { useState, useEffect } from 'react';
 import { getPost } from '../service/api';
 
@@ -13,7 +12,7 @@ const usePosts = () => {
       setError(null);
       try {
         const response = await getPost();
-        setPosts(response.data);
+        setPosts(response.data.posts);
       } catch (err) {
         setError('Error al obtener las publicaciones.');
       } finally {

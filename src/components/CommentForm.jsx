@@ -18,8 +18,8 @@ import {
 import useComments from '../hooks/useCommentView';
 
 const CommentForm = ({ postId }) => {
-  const [content, setContent] = useState('');
-  const [userName, setUserName] = useState('');
+  const [comment, setComment] = useState('');
+  const [author, setAuthor] = useState('');
   const { comments, loading, error, handleAddComment } = useComments(postId);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -28,11 +28,11 @@ const CommentForm = ({ postId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (content && userName) {
+    if (comment && author) {
       try {
-        await handleAddComment(postId, content, userName);
-        setContent('');
-        setUserName('');
+        await handleAddComment(postId, comment, author);
+        setComment('');
+        setAuthor('');
         toast({
           title: 'Comentario agregado',
           description: 'Tu comentario ha sido agregado con éxito.',
@@ -41,7 +41,7 @@ const CommentForm = ({ postId }) => {
           isClosable: true,
         });
         onClose();
-      } catch (err) {
+      } catch (error) {
         toast({
           title: 'Error',
           description: 'Hubo un problema al agregar tu comentario.',
@@ -80,16 +80,16 @@ const CommentForm = ({ postId }) => {
                 <FormLabel>Usuario</FormLabel>
                 <Input
                   type="text"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
                   placeholder="Tu nombre"
                 />
               </FormControl>
               <FormControl id="content" isRequired mt={4}>
                 <FormLabel>Comentario</FormLabel>
                 <Textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
                   placeholder="Escribe tu comentario aquí"
                 />
               </FormControl>

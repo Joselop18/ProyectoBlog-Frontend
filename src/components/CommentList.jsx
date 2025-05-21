@@ -10,12 +10,11 @@ const CommentsList = ({ postId, postTitle }) => {
   const headingColor = useColorModeValue('teal.600', 'teal.300');
   const textColor = useColorModeValue('gray.800', 'gray.200');
   const shadowColor = useColorModeValue('lg', 'xl');
-  const avatarBgColor = useColorModeValue('teal.500', 'teal.700');
   const timestampColor = useColorModeValue('gray.500', 'gray.400');
 
-  const sortedComments = comments
-    ? comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    : [];
+  const sortedComments = Array.isArray(comments)
+  ? [...comments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  : [];
 
   return (
     <Box p={4} bg={useColorModeValue('gray.50', 'gray.900')} borderRadius="md" shadow="sm">
@@ -47,17 +46,12 @@ const CommentsList = ({ postId, postTitle }) => {
               transition="all 0.3s ease"
             >
               <HStack spacing={4} align="center">
-                <Avatar
-                  name={comment.userName}
-                  src={`https://robohash.org/${comment.userName.toLowerCase()}?size=100x100&set=set3`}
-                  bg={avatarBgColor}
-                />
                 <Heading size="sm" color={headingColor} fontWeight="bold">
-                  {comment.userName}
+                  {comment.author}
                 </Heading>
               </HStack>
               <Text fontSize="md" mt={4} color={textColor}>
-                {comment.content}
+                {comment.comment}
               </Text>
               <Text fontSize="sm" color={timestampColor} mt={2}>
                 {new Date(comment.createdAt).toLocaleString()}

@@ -62,11 +62,10 @@ const HomePage = () => {
       <>
         <Navbar />
         <Container maxW="container.xl" py={10}>
-          <Heading mb={6} fontSize="3xl" color={textColor} fontWeight="bold" textAlign="center">
-            No hay publicaciones disponibles
-          </Heading>
           {sortedPosts.length === 0 ? (
-            <Text color={textColor} fontSize="lg" textAlign="center"></Text>
+            <Heading mb={6} fontSize="3xl" color={textColor} fontWeight="bold" textAlign="center">
+              No hay publicaciones disponibles
+            </Heading>
           ) : (
             <SimpleGrid columns={{ base: 1, sm: 2, md: 2, lg: 3 }} spacing={10}>
               {sortedPosts.map((post) => (
@@ -81,6 +80,11 @@ const HomePage = () => {
             </SimpleGrid>
           )}
         </Container>
+        <Container maxW="container.xl" py={10}>
+          <Text fontSize="lg" color={textColor} textAlign="center">
+            © 2025 Todos los derechos reservados.
+          </Text>
+        </Container>  
       </>
     );
   };
