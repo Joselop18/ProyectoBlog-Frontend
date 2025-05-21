@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Input,
@@ -13,38 +13,60 @@ import {
   useDisclosure,
   FormControl,
   FormLabel,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
-import useComments from '../hooks/useCommentView';
 
-const CommentForm = ({ postId }) => {
+const CommentForm = ({ postId, handleAddComment, handleUpdateComment, editingComment, setEditingComment }) => {
   const [comment, setComment] = useState('');
   const [author, setAuthor] = useState('');
-  const { loading, handleAddComment } = useComments(postId);
-
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+
+  useEffect(() => {
+    if (editingComment) {
+      setComment(editingComment.comment || '');
+      setAuthor(editingComment.author === 'Anónimo' ? '' : editingComment.author || '');
+      onOpen();
+    }
+  }, [editingComment, onOpen]);
+
+  const resetForm = () => {
+    setComment('');
+    setAuthor('');
+    setEditingComment(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (comment.trim()) {
       try {
-        await handleAddComment(postId, comment, author.trim() || 'Anónimo');
-        setComment('');
-        setAuthor('');
-        toast({
-          title: 'Comentario agregado',
-          description: 'Tu comentario ha sido publicado.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        if (editingComment) {
+          await handleUpdateComment(editingComment._id, {
+            comment,
+            author: author.trim() || 'Anónimo',
+          });
+          toast({
+            title: 'Comentario actualizado',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        } else {
+          await handleAddComment(postId, comment, author.trim() || 'Anónimo');
+          toast({
+            title: 'Comentario agregado',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+        resetForm();
         onClose();
       } catch (error) {
         toast({
           title: 'Error',
-          description: 'Hubo un problema al agregar tu comentario.',
+          description: 'Hubo un problema al guardar el comentario.',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -63,20 +85,22 @@ const CommentForm = ({ postId }) => {
 
   return (
     <>
-      <Button onClick={onOpen} colorScheme="teal">
-        Agregar Comentario
-      </Button>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      {!editingComment && (
+        <Button onClick={onOpen} colorScheme="teal">
+          Agregar Comentario
+        </Button>
+      )}
+      <Modal isOpen={isOpen} onClose={() => { onClose(); resetForm(); }}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Agregar Comentario</ModalHeader>
+          <ModalHeader>{editingComment ? 'Editar Comentario' : 'Agregar Comentario'}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <form onSubmit={handleSubmit}>
               <FormControl>
                 <FormLabel>Tu nombre (opcional)</FormLabel>
                 <Input
-                  placeholder="Escribe Tu Nombre aqui (Opcional)"
+                  placeholder="Escribe Tu Nombre aquí (Opcional)"
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                 />
@@ -90,10 +114,10 @@ const CommentForm = ({ postId }) => {
                 />
               </FormControl>
               <ModalFooter>
-                <Button colorScheme="teal" type="submit" mr={3} isLoading={loading}>
-                  Enviar Comentario
+                <Button colorScheme="teal" type="submit" mr={3}>
+                  {editingComment ? 'Actualizar' : 'Enviar Comentario'}
                 </Button>
-                <Button onClick={onClose}>Cerrar</Button>
+                <Button onClick={() => { onClose(); resetForm(); }}>Cerrar</Button>
               </ModalFooter>
             </form>
           </ModalBody>

@@ -8,23 +8,58 @@ import {
   List,
   ListItem,
   ListIcon,
+  HStack,
+  useToast,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
 } from '@chakra-ui/react';
-import { CheckCircleIcon } from '@chakra-ui/icons';
-import { useState } from 'react';
+import { CheckCircleIcon, EditIcon, DeleteIcon } from '@chakra-ui/icons';
+import { useState, useRef } from 'react';
 import CommentForm from './CommentForm';
 import useComments from '../hooks/useCommentView';
 
 const Post = ({ post }) => {
   const [openPostId, setOpenPostId] = useState(null);
+  const [editingComment, setEditingComment] = useState(null);
+  const [commentToDelete, setCommentToDelete] = useState(null);
+
+  const cancelRef = useRef();
+  const toast = useToast();
+
   const textColor = useColorModeValue('gray.800', 'white');
   const secondaryTextColor = useColorModeValue('gray.600', 'gray.400');
 
   const isOpen = openPostId === post._id;
   const toggleOpen = () => {
     setOpenPostId(isOpen ? null : post._id);
+    setEditingComment(null);
   };
 
-  const { comments, loading, error, handleAddComment } = useComments(post._id);
+  const {
+    comments,
+    loading,
+    error,
+    handleAddComment,
+    handleDeleteComment,
+    handleUpdateComment,
+  } = useComments(post._id);
+
+  const confirmDelete = async () => {
+    if (commentToDelete) {
+      await handleDeleteComment(commentToDelete._id);
+      toast({
+        title: 'Comentario eliminado',
+        status: 'info',
+        duration: 3000,
+        isClosable: true,
+      });
+      setCommentToDelete(null);
+    }
+  };
 
   return (
     <Box
@@ -45,13 +80,20 @@ const Post = ({ post }) => {
       <Text mt={2} color={secondaryTextColor}>
         {post.course?.description}
       </Text>
+
       <Button onClick={toggleOpen} mt={4}>
         {isOpen ? 'Ocultar comentarios' : 'Ver comentarios'}
       </Button>
 
       <Collapse in={isOpen} animateOpacity>
         <Box mt={4}>
-          <CommentForm postId={post._id} handleAddComment={handleAddComment} />
+          <CommentForm
+            postId={post._id}
+            handleAddComment={handleAddComment}
+            handleUpdateComment={handleUpdateComment}
+            editingComment={editingComment}
+            setEditingComment={setEditingComment}
+          />
 
           {loading ? (
             <Text mt={2}>Cargando comentarios...</Text>
@@ -67,7 +109,24 @@ const Post = ({ post }) => {
                       {comment.author}:
                     </Text>
                     <Text color={secondaryTextColor}>{comment.comment}</Text>
-                    <Divider my={2} />
+                    <HStack spacing={2} mt={2}>
+                      <Button
+                        size="sm"
+                        leftIcon={<EditIcon />}
+                        onClick={() => setEditingComment(comment)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorScheme="red"
+                        leftIcon={<DeleteIcon />}
+                        onClick={() => setCommentToDelete(comment)}
+                      >
+                        Eliminar
+                      </Button>
+                    </HStack>
+                    <Divider my={3} />
                   </ListItem>
                 ))
               ) : (
@@ -77,6 +136,32 @@ const Post = ({ post }) => {
           )}
         </Box>
       </Collapse>
+
+      {/* Modal de Confirmación de Eliminación */}
+      <AlertDialog
+        isOpen={!!commentToDelete}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setCommentToDelete(null)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Eliminar Comentario
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              ¿Estás seguro que deseas eliminar este comentario?
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={() => setCommentToDelete(null)}>
+                Cancelar
+              </Button>
+              <Button colorScheme="red" onClick={confirmDelete} ml={3}>
+                Eliminar
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   );
 };
