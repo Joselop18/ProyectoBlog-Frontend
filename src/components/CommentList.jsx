@@ -29,9 +29,9 @@ const CommentsList = ({ postId, postTitle }) => {
           Últimos comentarios
         </Heading>
         {sortedComments.length > 0 ? (
-          sortedComments.map((comment) => (
+          sortedComments.map((comments) => (
             <Box
-              key={comment._id}
+              key={comments._id}
               borderWidth={1}
               borderColor={boxBorderColor}
               borderRadius="lg"
@@ -47,14 +47,14 @@ const CommentsList = ({ postId, postTitle }) => {
             >
               <HStack spacing={4} align="center">
                 <Heading size="sm" color={headingColor} fontWeight="bold">
-                  {comment.author}
+                  {comments.author}
                 </Heading>
               </HStack>
               <Text fontSize="md" mt={4} color={textColor}>
-                {comment.comment}
+                {comments.comment}
               </Text>
               <Text fontSize="sm" color={timestampColor} mt={2}>
-                {new Date(comment.createdAt).toLocaleString()}
+                {new Date(comments.createdAt).toLocaleString()}
               </Text>
             </Box>
           ))

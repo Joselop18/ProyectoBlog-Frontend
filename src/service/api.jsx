@@ -27,13 +27,8 @@ export const getPost = async () => {
 
 export const fetchComments = async (postId) => {
   try {
-    const response = await apiClient.get(`/comments/${postId}`);
-    if (response.data && response.data.comments) {
-        return response.data.comments;
-    } else {
-        console.error("Estructura de respuesta inesperada de fetchComments:", response.data);
-        return [];
-    }
+    const response = await apiClient.get(`/comments/post/${postId}`);
+    return response.data.comments;
   } catch (error) {
     console.error("Error al obtener comentarios:", error);
     return { error: true, e: error };
@@ -50,10 +45,40 @@ export const saveComment = async (postId, data) => {
   }
 };
 
+export const getComments = async () => {
+  try {
+    const response = await apiClient.get(`/comments/`);
+    return response.data.comments;
+  } catch (error) {
+    console.error("Error al obtener comentarios:", error);
+    return { error: true, e: error };
+  }
+};
+
+export const getCommentById = async (id) => {
+  try {
+    const response = await apiClient.get(`/comments/${id}`);
+    return response.data.comment;
+  } catch (error) {
+    console.error("Error al obtener el comentario por ID:", error);
+    return { error: true, e: error };
+  }
+};
+
+export const fetchCommentsByPost = async (postId) => {
+  try {
+    const response = await apiClient.get(`/comments/post/${postId}`);
+    return response.data.comments;
+  } catch (error) {
+    console.error("Error al obtener comentarios para el post:", error);
+    return { error: true, e: error };
+  }
+};
+
 export const updateComment = async (id, data) => {
   try {
     const response = await apiClient.put(`/comments/${id}`, data);
-    return response.data;
+    return response.data.comment;
   } catch (error) {
     return { error: true, e: error };
   }

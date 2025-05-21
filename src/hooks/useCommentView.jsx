@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { fetchComments, saveComment } from '../service/api';
+import {
+  fetchComments,
+  saveComment,
+  deleteComment,
+  updateComment
+} from '../service/api';
 
 const useComments = (post = null) => {
   const [comments, setComments] = useState([]);
@@ -8,8 +13,8 @@ const useComments = (post = null) => {
 
   const loadComments = async () => {
     if (!post) {
-        setComments([]);
-        return;
+      setComments([]);
+      return;
     }
 
     setLoading(true);
@@ -17,17 +22,16 @@ const useComments = (post = null) => {
     try {
       const data = await fetchComments(post);
 
-      if (data && data.error) {
-          setError('Hubo un error al cargar los comentarios.');
-          setComments([]); 
+      if (data?.error) {
+        setError('Hubo un error al cargar los comentarios.');
+        setComments([]);
       } else if (Array.isArray(data)) {
-          setComments(data);
+        setComments(data);
       } else {
-          setError('Respuesta inesperada al cargar los comentarios.');
-          console.error('Formato de datos inesperado de fetchComments:', data);
-          setComments([]);
+        setError('Respuesta inesperada al cargar los comentarios.');
+        console.error('Formato inesperado de fetchComments:', data);
+        setComments([]);
       }
-
     } catch (error) {
       setError('Hubo un error al cargar los comentarios.');
       console.error(error);
@@ -37,24 +41,19 @@ const useComments = (post = null) => {
     }
   };
 
-  const handleAddComment = async (post, comment, author) => {
+  const handleAddComment = async (postId, comment, author) => {
     setLoading(true);
     setError(null);
-
     try {
-      const commentData = { comment, author, post };
-      const responseData = await saveComment(post, commentData);
-      if (responseData && responseData.error) {
-          setError('Hubo un error al agregar el comentario.');
-      } else if (responseData && responseData.comment) {
-        const newComment = responseData.comment;
-        setComments((prevComments) => [...prevComments, newComment]);
-        setError(null);
+      const commentData = { comment, author, postId: post };
+      const responseData = await saveComment(postId, commentData);
+      if (responseData?.error) {
+        setError('Hubo un error al agregar el comentario.');
+      } else if (responseData?.comment) {
+        setComments((prev) => [...prev, responseData.comment]);
       } else {
-        setError('Hubo un error al agregar el comentario o la respuesta del servidor fue inesperada.');
-        console.error('Respuesta inesperada de la API al guardar comentario:', responseData);
+        setError('Error inesperado al guardar el comentario.');
       }
-
     } catch (error) {
       setError('Hubo un error al agregar el comentario.');
       console.error(error);
@@ -63,8 +62,36 @@ const useComments = (post = null) => {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    setLoading(true);
+    try {
+      await deleteComment(commentId);
+      setComments((prev) => prev.filter((c) => c._id !== commentId));
+    } catch (error) {
+      setError('Hubo un error al eliminar el comentario.');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateComment = async (commentId, updatedData) => {
+    setLoading(true);
+    try {
+      const updated = await updateComment(commentId, updatedData);
+      setComments((prev) =>
+        prev.map((c) => (c._id === commentId ? updated : c))
+      );
+    } catch (error) {
+      setError('Hubo un error al actualizar el comentario.');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-  loadComments();
+    loadComments();
   }, [post]);
 
   return {
@@ -72,6 +99,8 @@ const useComments = (post = null) => {
     loading,
     error,
     handleAddComment,
+    handleDeleteComment,
+    handleUpdateComment,
   };
 };
 

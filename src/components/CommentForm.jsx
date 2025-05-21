@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Button, 
-  Input, 
+import React, { useState } from 'react';
+import {
+  Button,
+  Input,
   Textarea,
-  Modal, 
-  ModalOverlay, 
-  ModalContent, 
+  Modal,
+  ModalOverlay,
+  ModalContent,
   ModalHeader,
-  ModalFooter, 
+  ModalFooter,
   ModalBody,
   ModalCloseButton,
   useDisclosure,
-  FormControl, 
+  FormControl,
   FormLabel,
-  useToast 
+  useToast
 } from '@chakra-ui/react';
 import useComments from '../hooks/useCommentView';
 
 const CommentForm = ({ postId }) => {
   const [comment, setComment] = useState('');
   const [author, setAuthor] = useState('');
-  const { comments, loading, error, handleAddComment } = useComments(postId);
+  const { loading, handleAddComment } = useComments(postId);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -28,14 +28,14 @@ const CommentForm = ({ postId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (comment && author) {
+    if (comment.trim()) {
       try {
-        await handleAddComment(postId, comment, author);
+        await handleAddComment(postId, comment, author.trim() || 'Anónimo');
         setComment('');
         setAuthor('');
         toast({
           title: 'Comentario agregado',
-          description: 'Tu comentario ha sido agregado con éxito.',
+          description: 'Tu comentario ha sido publicado.',
           status: 'success',
           duration: 3000,
           isClosable: true,
@@ -52,8 +52,8 @@ const CommentForm = ({ postId }) => {
       }
     } else {
       toast({
-        title: 'Campos incompletos',
-        description: 'Por favor completa todos los campos.',
+        title: 'Comentario vacío',
+        description: 'Escribe algo antes de enviar.',
         status: 'warning',
         duration: 3000,
         isClosable: true,
@@ -61,11 +61,8 @@ const CommentForm = ({ postId }) => {
     }
   };
 
-  const uniqueComments = Array.from(new Set(comments.map(comment => comment._id)))
-    .map(id => comments.find(comment => comment._id === id));
-
   return (
-    <div>
+    <>
       <Button onClick={onOpen} colorScheme="teal">
         Agregar Comentario
       </Button>
@@ -76,35 +73,33 @@ const CommentForm = ({ postId }) => {
           <ModalCloseButton />
           <ModalBody>
             <form onSubmit={handleSubmit}>
-              <FormControl id="userName" isRequired>
-                <FormLabel>Usuario</FormLabel>
+              <FormControl>
+                <FormLabel>Tu nombre (opcional)</FormLabel>
                 <Input
-                  type="text"
+                  placeholder="Escribe Tu Nombre aqui (Opcional)"
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Tu nombre"
                 />
               </FormControl>
-              <FormControl id="content" isRequired mt={4}>
+              <FormControl mt={4} isRequired>
                 <FormLabel>Comentario</FormLabel>
                 <Textarea
+                  placeholder="Escribe tu comentario aquí"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="Escribe tu comentario aquí"
                 />
               </FormControl>
               <ModalFooter>
-                <Button colorScheme="teal" mr={3} type="submit" isLoading={loading}>
+                <Button colorScheme="teal" type="submit" mr={3} isLoading={loading}>
                   Enviar Comentario
                 </Button>
-                <Button variant="ghost" onClick={onClose}>Cerrar</Button>
+                <Button onClick={onClose}>Cerrar</Button>
               </ModalFooter>
             </form>
           </ModalBody>
         </ModalContent>
       </Modal>
-
-    </div>
+    </>
   );
 };
 
